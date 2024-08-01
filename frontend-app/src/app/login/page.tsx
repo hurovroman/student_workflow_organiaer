@@ -3,6 +3,8 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import jwt from "jsonwebtoken";
+import { useAuth } from "../../../context/AuthContext"
 
 export default function page() {
 
@@ -35,6 +37,36 @@ export default function page() {
     }
   };
 
+  export default function handler(req, res) {
+    if (req.method === 'POST') {
+      const { username, password } = req.body;
+  
+      // Replace this with your actual user authentication logic
+      if (username === 'user' && password === 'pass') {
+        const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
+    } else {
+      res.status(405).json({ message: 'Method not allowed' });
+    }
+  }
+
+  const ProtectedPage = () => {
+    const { user, logout } = useAuth();
+  
+    if (!user) {
+      return <div>Loading...</div>;
+    }
+  
+    return (
+      <div>
+        <h1>Welcome, {user.username}</h1>
+        <button onClick={logout}>Logout</button>
+      </div>
+    );
+  };
 
   return (
     <section className="border-red-500 bg-gray-200 min-h-screen flex items-center justify-center">
